@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, View, FlatList } from "react-native"
+import { Alert, StyleSheet, Text, View, FlatList, useWindowDimensions } from "react-native"
 import Title from "../components/ui/Title";
 import { useEffect, useState } from "react";
 import NumberContainer from "../components/game/NumberContainer";
@@ -26,7 +26,7 @@ const GameScreen = ({ userNumber, onGameOver }) => {
   const initialGuess = generateRandomBetween(1, 100, userNumber);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
   const [guessRounds, setGuessRounds] = useState([initialGuess]);
-
+  const { width, height } = useWindowDimensions();
 
   useEffect(() => {
     if (currentGuess === userNumber) {
@@ -60,30 +60,65 @@ const GameScreen = ({ userNumber, onGameOver }) => {
   }
 
   const guessRoundsListLength = guessRounds.length;
+  const marginTopDistance = width < 380 ? 20 : 100;
+  let content = (
+    <>
+      <NumberContainer>{currentGuess}</NumberContainer>
 
+      <View style={styles.controlsContainer}>
+        <Card>
+          <InstructionText style={styles.instructionText}>
+            Higher or lower?
+          </InstructionText>
+
+          <View style={styles.buttonsContainer}>
+            <PrimaryButton
+              onPress={handleDirection.bind(this, 'lower')}
+            >
+              <Ionicons name="remove" size={24} color="white" />
+            </PrimaryButton>
+
+            <PrimaryButton
+              onPress={handleDirection.bind(this, 'greater')}
+            >
+              <Ionicons name="add" size={24} color="white" />
+            </PrimaryButton>
+          </View>
+        </Card>
+      </View>
+    </>
+  );
+
+  if (width > 500) {
+    content = (
+      <>
+        <View>
+
+          <View style={styles.buttonsContainer}>
+            <View >
+              <PrimaryButton style={styles.buttonContainer} onPress={handleDirection.bind(this, 'lower')}>
+
+                <Ionicons name="remove" size={24} color='white' />
+              </PrimaryButton>
+            </View>
+            <NumberContainer>{currentGuess}</NumberContainer>
+            <View>
+              <PrimaryButton style={styles.buttonContainer} onPress={handleDirection.bind(this, 'greater')}>
+
+                <Ionicons name="add" size={24} color='white' />
+              </PrimaryButton>
+            </View>
+          </View>
+        </View>
+
+      </>
+    )
+  }
   return (
     <View style={styles.screen}>
       <Title>Opponnent's Guess</Title>
-      <NumberContainer>{currentGuess}</NumberContainer>
-      <Card>
-        <InstructionText style={styles.instructionText}>Higher or lower?</InstructionText>
-        <View style={styles.buttonsContainer}>
-          <View>
-            <PrimaryButton style={styles.buttonContainer} onPress={handleDirection.bind(this, 'lower')}>
 
-              <Ionicons name="remove" size={24} color='white' />
-            </PrimaryButton>
-          </View>
-          <View>
-            <PrimaryButton style={styles.buttonContainer} onPress={handleDirection.bind(this, 'greater')}>
-
-              <Ionicons name="add" size={24} color='white' />
-            </PrimaryButton>
-          </View>
-
-
-        </View>
-      </Card>
+      {content}
 
       <View style={styles.listContainer}>
 
@@ -94,7 +129,7 @@ const GameScreen = ({ userNumber, onGameOver }) => {
           keyExtractor={item => item} />
       </View>
 
-    </View>
+    </View >
   )
 }
 
@@ -103,19 +138,30 @@ export default GameScreen;
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    padding: 24
+    padding: 16,
+    alignItems: 'center',
   },
+
+  controlsContainer: {
+    marginTop: 36,
+    width: '90%',
+    maxWidth: 400,
+  },
+
   instructionText: {
-    marginBottom: 12,
+    marginBottom: 16,
+    textAlign: 'center',
   },
+
   buttonsContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12, // 👈 cleaner spacing (RN 0.71+)
   },
-  buttonContainer: {
-    flex: 1,
-  },
+
   listContainer: {
     flex: 1,
-    padding: 16
-  }
-})
+    width: '100%',
+    padding: 16,
+  },
+});
